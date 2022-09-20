@@ -159,11 +159,13 @@ export default {
     },
     testEth: {
       url: 'http://127.0.0.1:7777',
-      chainId: 1337
+      chainId: 1337,
+      accounts: keys.length ? keys : undefined
     },
     testAvax: {
       url: 'http://127.0.0.1:6666',
-      chainId: 1337
+      chainId: 1337,
+      accounts: keys.length ? keys : undefined
     },
   },
 
