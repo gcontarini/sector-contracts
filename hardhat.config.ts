@@ -1,6 +1,7 @@
 import 'hardhat-deploy';
 import 'hardhat-contract-sizer';
 import 'hardhat-gas-reporter';
+import 'hardhat-change-network';
 import env from 'dotenv';
 import { subtask } from 'hardhat/config';
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names';
@@ -168,7 +169,6 @@ export default {
       accounts: keys.length ? keys : undefined
     },
   },
-
   solidity: {
     compilers: [
       {

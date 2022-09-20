@@ -8,6 +8,8 @@ import { ERC4626 } from "./ERC4626/ERC4626.sol";
 // import "hardhat/console.sol";
 
 contract SectorVault is ERC4626 {
+	event bridgeAsset(uint256 chainId, uint256 amount);
+
 	constructor(
 		ERC20 _asset,
 		Bank _bank,
@@ -26,5 +28,10 @@ contract SectorVault is ERC4626 {
 
 	function totalAssets() public view override returns (uint256) {
 		return asset.balanceOf(address(this));
+	}
+
+	// Added function to emit event
+	function bridgeAssets(uint256 chainId, uint256 amount) public {
+		emit bridgeAsset(chainId, amount);
 	}
 }
