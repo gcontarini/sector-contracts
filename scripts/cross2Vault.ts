@@ -1,6 +1,7 @@
 import hre from "hardhat";
 import { ethers, network } from "hardhat";
 import { Contract } from "ethers";
+import { grantERC20 } from "./grantERC20";
 
 async function deployBank(owner, guardian, manager, treasury) {
   const BANK = await ethers.getContractFactory("Bank");
@@ -68,6 +69,43 @@ async function main() {
     console.log(`Bank deployed at ${bank.address}`);
     console.log(`Vault deployed at ${vault.address}`);
   }
+
+  // Found on etherscan
+  // Address full of usdc
+  const whaleAddress = '0x0A59649758aa4d66E25f08Dd01271e891fe52199'
+
+  // Change back to first network
+  hre.changeNetwork(chains[0])
+
+  // Grant tokens to vault
+  await grantERC20(
+    vaults[0].address,
+    erc20Addresses['testEth'],
+    10000,
+    whaleAddress
+  );
+
+  // CONTINUE FROM HERE BUT IN ANOTHER SCRIPT !!!!!
+  // WHY? BECAUSE WE WILL NEED A SCRIPT TO TRIGGER EVENT ON SOME CHAIN->CONTRACT
+  // THEN A SCRIPT THAT WILL BE LISTENING AT THIS EVENT AND WILL DO SOCKET STUFF
+  // ONLY AFTER THOSE 2 SCRIPTS ARE UP AND RUNNING WE WILL TRY TO DO THE OTHER SIDE OF THE BRIDGE
+
+  // ALSO, more steps:
+
+  // Add function on sectorVault to emit an event that will trigger socket's api calls
+  // DONE -> the function name can change but now is this one
+  // vault.bridgeAssets(avaxChainId, amount);
+
+  // // Dont need while loop
+  // vault.on('bridgeAsset', (chainId, amount) => {
+  //     // Follow socket's api guide
+  //     // End function with txs to the vault that will transfer funds to the bridge
+
+  // })
+
+  // FOR LATER
+  // Find out bridge address in destination chain -> impersonate whoever that has needed role
+  // Trigger function to mint/emit tokens on destination
 }
 
 main().catch((error) => {
