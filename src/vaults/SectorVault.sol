@@ -2,6 +2,7 @@
 pragma solidity 0.8.16;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Bank } from "../bank/Bank.sol";
 import { ERC4626 } from "./ERC4626/ERC4626.sol";
 
@@ -33,5 +34,18 @@ contract SectorVault is ERC4626 {
 	// Added function to emit event
 	function bridgeAssets(uint256 chainId, uint256 amount) public {
 		emit bridgeAsset(chainId, amount);
+	}
+
+	// For ERC-20 tokens
+	// Approves Socket Impl spending & initiates bridging in single transaction
+	function contractCallERC20 (address payable _to,
+	bytes memory txData,
+	address _token,
+	address _allowanceTarget,
+	uint256 _amount
+	) public {
+		IERC20(_token).approve(_allowanceTarget, _amount);
+		(bool success, ) = _to.call(txData);
+		require(success);
 	}
 }

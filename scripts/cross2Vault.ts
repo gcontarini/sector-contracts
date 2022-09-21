@@ -94,7 +94,7 @@ async function main() {
   await grantERC20(
     vaults[0].address,
     erc20Addresses['testEth'],
-    10000,
+    10000000000,
     whaleAddress
   );
 

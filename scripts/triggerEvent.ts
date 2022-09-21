@@ -12,7 +12,7 @@ export async function triggerBridge(vaultAddress: string, chainId: number, amoun
 async function main() {
   const vault = vaultAddr.eth;
   const chainId = 4242;
-  const amount = 500;
+  const amount = 21000001;
 
   console.log(`Trigger on vault: ${vault} to chain ${chainId} an amount ${amount}`)
   await triggerBridge(vault, chainId, amount);
