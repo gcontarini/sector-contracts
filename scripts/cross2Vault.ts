@@ -2,6 +2,7 @@ import hre from "hardhat";
 import { ethers, network } from "hardhat";
 import { Contract } from "ethers";
 import { grantERC20 } from "./grantERC20";
+import fs from 'fs';
 
 async function deployBank(owner, guardian, manager, treasury) {
   const BANK = await ethers.getContractFactory("Bank");
@@ -69,6 +70,18 @@ async function main() {
     console.log(`Bank deployed at ${bank.address}`);
     console.log(`Vault deployed at ${vault.address}`);
   }
+
+  // Write vault addresses to a file
+  let jsonContent = JSON.stringify({
+    eth: vaults[0].address,
+    avax: vaults[1].address
+  });
+  fs.writeFile("vaultAddress.json", jsonContent, 'utf8', function (err) {
+    if (err) {
+      console.log("An error occured while writing JSON Object to File.");
+      return console.log(err);
+    }
+  });
 
   // Found on etherscan
   // Address full of usdc
