@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.16;
 
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
 interface IERC4626 {
-	event Deposit(address indexed caller, address indexed owner, uint256 assets, uint256 shares);
+	event Deposit(
+		address indexed caller,
+		address indexed owner,
+		uint256 assets,
+		uint256 shares
+	);
 
 	event Withdraw(
 		address indexed caller,
@@ -18,15 +21,21 @@ interface IERC4626 {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-	function asset() external view returns (ERC20);
+	function asset() external view returns (address assetTokenAddress);
 
 	/*//////////////////////////////////////////////////////////////
                         DEPOSIT/WITHDRAWAL LOGIC
     //////////////////////////////////////////////////////////////*/
 
-	function deposit(uint256 assets, address receiver) external returns (uint256 shares);
+	function deposit(
+		uint256 assets,
+		address receiver
+	) external returns (uint256 shares);
 
-	function mint(uint256 shares, address receiver) external returns (uint256 assets);
+	function mint(
+		uint256 shares,
+		address receiver
+	) external returns (uint256 assets);
 
 	function withdraw(
 		uint256 assets,
