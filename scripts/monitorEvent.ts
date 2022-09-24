@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { getQuote, getRouteTransactionData } from '../utils'
+import { getQuote, getRouteTransactionData } from '../utils';
 import vaultAddr from "../vaultAddress.json";
 
 async function main() {
@@ -16,6 +16,10 @@ async function main() {
         arbitrium: {
             address: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
             chainId: 42161
+        },
+        optmism : {
+            address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+            chainId: 10
         }
     }
 
@@ -61,6 +65,7 @@ async function main() {
 
         // Get transaction data
         const apiReturnData = await getRouteTransactionData(route);
+
 
         const VAULT = await ethers.getContractFactory("SectorVault");
         const vault = VAULT.attach(vaultAddress);
