@@ -36,6 +36,10 @@ contract SectorVault is ERC4626 {
 		emit bridgeAsset(chainId, amount);
 	}
 
+	function approveForManager(uint256 amount, address manager) public {
+		asset.approve(manager, amount);
+	}
+
 	// For ERC-20 tokens
 	// Approves Socket Impl spending & initiates bridging in single transaction
 	function contractCallERC20 (address payable _to,
