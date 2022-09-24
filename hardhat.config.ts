@@ -96,7 +96,7 @@ export default {
       },
     },
     localhost: {
-      accounts: keys.length ? keys : undefined,
+      // accounts: keys.length ? keys : undefined,
       tags: [FORK_CHAIN],
     },
     fantom: {
@@ -157,14 +157,6 @@ export default {
       url: 'https://mainnet.infura.io/v3/' + INFURA_API_KEY,
       gasPrice: 2.1e9,
       chainId: 1,
-    },
-    testEth: {
-      url: 'http://127.0.0.1:7777',
-      chainId: 1337
-    },
-    testAvax: {
-      url: 'http://127.0.0.1:6666',
-      chainId: 1337
     },
   },
   solidity: {
