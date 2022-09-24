@@ -9,7 +9,7 @@ import { ERC4626 } from "./ERC4626/ERC4626.sol";
 // import "hardhat/console.sol";
 
 contract SectorVault is ERC4626 {
-	event bridgeAsset(uint256 chainId, uint256 amount);
+	event bridgeAsset(uint32 _fromChainId, uint32 _toChainId, uint256 amount);
 
 	constructor(
 		ERC20 _asset,
@@ -32,8 +32,12 @@ contract SectorVault is ERC4626 {
 	}
 
 	// Added function to emit event
-	function bridgeAssets(uint256 chainId, uint256 amount) public {
-		emit bridgeAsset(chainId, amount);
+	function bridgeAssets(
+		uint32 _fromChainId,
+		uint32 _toChainId,
+		uint256 amount
+	) public {
+		emit bridgeAsset(_fromChainId, _toChainId, amount);
 	}
 
 	function approveForManager(uint256 amount, address manager) public {
@@ -42,11 +46,12 @@ contract SectorVault is ERC4626 {
 
 	// For ERC-20 tokens
 	// Approves Socket Impl spending & initiates bridging in single transaction
-	function contractCallERC20 (address payable _to,
-	bytes memory txData,
-	address _token,
-	address _allowanceTarget,
-	uint256 _amount
+	function contractCallERC20(
+		address payable _to,
+		bytes memory txData,
+		address _token,
+		address _allowanceTarget,
+		uint256 _amount
 	) public {
 		IERC20(_token).approve(_allowanceTarget, _amount);
 		(bool success, ) = _to.call(txData);

@@ -1,22 +1,21 @@
 import { ethers } from "hardhat";
 import vaultAddr from "../vaultAddress.json";
 
-export async function triggerBridge(vaultAddress: string, chainId: number, amount: number) {
+export async function triggerBridge(vaultAddress: string, fromChainId: number, toChainId: number, amount: number) {
   const VAULT = await ethers.getContractFactory("SectorVault");
   const vault = VAULT.attach(vaultAddress);
 
   // chainId, amount
-  await vault.bridgeAssets(chainId, amount);
+  await vault.bridgeAssets(fromChainId, toChainId, amount);
 }
 
 async function main() {
   const vault = vaultAddr.eth;
-  const chainId = 4242;
+  const fromChainId = 1;
+  const toChainId = 42161;
   const amount = 21000001;
 
-  console.log(`Trigger on vault: ${vault} to chain ${chainId} an amount ${amount}`)
-  await triggerBridge(vault, chainId, amount);
-  console.log('LET\'S GO!')
+  await triggerBridge(vault, fromChainId, toChainId, amount);
 }
 
 main().catch((error) => {

@@ -3,89 +3,83 @@ import { getQuote, getRouteTransactionData } from '../utils'
 import vaultAddr from "../vaultAddress.json";
 
 async function main() {
-  const vaultAddress = vaultAddr.eth;
+    const vaultAddress = vaultAddr.eth;
 
-  const [deployer] = await ethers.getSigners()
-  const owner = deployer.address
+    const [deployer] = await ethers.getSigners()
+    const owner = deployer.address
 
-  const erc20Addresses = {
-    testEth: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    testAvax: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
-  }
-
-  const VAULT = await ethers.getContractFactory("SectorVault");
-  const vault = VAULT.attach(vaultAddress);
-
-  vault.on('bridgeAsset', async (chainId, amount) => {
-    console.log(`WE GOT AN EVENT on chain ${chainId} with value of ${amount}`)
-
-    // Stores signer
-    const signer = await ethers.getSigner(vaultAddress);
-
-    // Bridging Params fetched from users
-    const fromChainId = 1;
-    const toChainId = 43114;
-
-    const fromAssetAddress = erc20Addresses.testEth;
-    const toAssetAddress = erc20Addresses.testAvax;
-    const userAddress = vaultAddress;
-    const uniqueRoutesPerBridge = true; // Returns the best route for a given DEX / bridge combination
-    const sort = "output"; // "output" | "gas" | "time"
-
-    // HAS TO USE MORE THAN TX
-    const singleTxOnly = false;
-
-    // For single transaction bridging, mark singleTxOnly flag as true in query params
-    const quote = await getQuote(
-      fromChainId,
-      fromAssetAddress,
-      toChainId, toAssetAddress,
-      amount, userAddress,
-      uniqueRoutesPerBridge,
-      sort, singleTxOnly
-    );
-    // console.log("QUOTE", quote)
-    // console.log("BRIDGE ERRORS", JSON.stringify(quote.result.bridgeRouteErrors))
-
-    // Choosing first route from the returned route results
-    const route = quote.result.routes[0];
-    // console.log("ROUTE", route);
-
-    const apiReturnData = await getRouteTransactionData(route);
-    console.log("APIReturnData", apiReturnData)
+    const erc20Addresses = {
+        ethereum: {
+            address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            chainId: 1
+        },
+        arbitrium: {
+            address: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
+            chainId: 42161
+        }
+    }
 
     const VAULT = await ethers.getContractFactory("SectorVault");
     const vault = VAULT.attach(vaultAddress);
 
-    await vault.approveForManager(amount, owner);
+    vault.on('bridgeAsset', async (_fromChainId, _toChainId, amount) => {
 
-    const tx = await vault.contractCallERC20(
-      apiReturnData.result.txTarget,
-      apiReturnData.result.txData,
-      apiReturnData.result.approvalData.approvalTokenAddress,
-      apiReturnData.result.approvalData.allowanceTarget,
-      apiReturnData.result.approvalData.minimumApprovalAmount
-    );
-    // console.log("TX", tx);
- })
+        console.log(`WE GOT AN EVENT on chain ${_fromChainId} ${typeof (_fromChainId)} to chain ${_toChainId} with value of ${amount}`)
+
+        // Bridging Params fetched from users
+        const fromChainId = _fromChainId;
+        const toChainId = _toChainId;
+
+        // get object with chainId === _fromChainId
+        const fromChain = Object.values(erc20Addresses).find(chain => chain.chainId === fromChainId);
+        const toChain = Object.values(erc20Addresses).find(chain => chain.chainId === toChainId);
+
+        if (!fromChain || !toChain) {
+            throw new Error('Chain not found');
+        }
+
+        // Set Socket quote request params
+        const fromAssetAddress = fromChain.address;
+        const toAssetAddress = toChain.address;
+        const userAddress = vaultAddress; // The receiver address
+        const uniqueRoutesPerBridge = true; // Set to true the best route for each bridge will be returned
+        const sort = "output"; // "output" | "gas" | "time"
+        const singleTxOnly = true; // Set to true to look for a single transaction route
+
+        // Get quote
+        const quote = await getQuote(
+            fromChainId,
+            fromAssetAddress,
+            toChainId, toAssetAddress,
+            amount, userAddress,
+            uniqueRoutesPerBridge,
+            sort, singleTxOnly
+        );
+
+        // Choosing first route from the returned route results
+        const route = quote.result.routes[0];
+
+        // Get transaction data
+        const apiReturnData = await getRouteTransactionData(route);
+
+        const VAULT = await ethers.getContractFactory("SectorVault");
+        const vault = VAULT.attach(vaultAddress);
+
+        await vault.approveForManager(amount, owner);
+
+        // Call bridgeAssets on vault's contract
+        const tx = await vault.contractCallERC20(
+            apiReturnData.result.txTarget,
+            apiReturnData.result.txData,
+            apiReturnData.result.approvalData.approvalTokenAddress,
+            apiReturnData.result.approvalData.allowanceTarget,
+            apiReturnData.result.approvalData.minimumApprovalAmount
+        );
+        // console.log("TX", tx);
+    })
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });
-
-/*
-
-// Main function
-async function main() {
-
-    // Uses web3 wallet in browser as provider
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-
-    // Prompt user for account connections
-    await provider.send("eth_requestAccounts", []);
-
-
-}
-*/
