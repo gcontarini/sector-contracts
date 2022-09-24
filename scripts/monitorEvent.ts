@@ -24,7 +24,7 @@ async function main() {
 
     vault.on('bridgeAsset', async (_fromChainId, _toChainId, amount) => {
 
-        console.log(`WE GOT AN EVENT on chain ${_fromChainId} ${typeof (_fromChainId)} to chain ${_toChainId} with value of ${amount}`)
+        console.log(`WE GOT AN EVENT on chain ${_fromChainId} to chain ${_toChainId} with value of ${amount}`)
 
         // Bridging Params fetched from users
         const fromChainId = _fromChainId;
