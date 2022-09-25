@@ -36,15 +36,15 @@ abstract contract ERC4626 is IERC4626, Auth {
 	) Auth(_owner, _guardian, _manager) {
 		asset = _asset;
 		bank = _bank;
-		// bank.addPool(
-		// 	Pool({
-		// 		vault: address(this),
-		// 		id: 0,
-		// 		managementFee: _managementFee.toUint16(),
-		// 		decimals: asset.decimals(),
-		// 		exists: true
-		// 	})
-		// );
+		bank.addPool(
+			Pool({
+				vault: address(this),
+				id: 0,
+				managementFee: _managementFee.toUint16(),
+				decimals: asset.decimals(),
+				exists: true
+			})
+		);
 	}
 
 	/*//////////////////////////////////////////////////////////////

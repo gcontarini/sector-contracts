@@ -30,7 +30,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 		_disableInitializers();
 	}
 
-	function __ERC4626U_init_(
+	function __ERC4626_init_(
 		ERC20 asset_,
 		Bank bank_,
 		string memory name_,
