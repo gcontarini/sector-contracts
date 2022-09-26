@@ -12,7 +12,7 @@ abstract contract SocketIntegratorU is AuthU {
 		uint32 _fromChainId,
 		uint32 _toChainId,
 		uint256 amount
-	) public {
+	) public onlyRole("MANAGER") {
 		emit bridgeAsset(_fromChainId, _toChainId, amount);
 	}
 
