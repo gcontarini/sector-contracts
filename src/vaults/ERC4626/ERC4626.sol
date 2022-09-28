@@ -20,28 +20,28 @@ abstract contract ERC4626 is IERC4626, Auth {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-	ERC20 public immutable asset;
-	Bank public immutable bank;
+	ERC20 internal _asset;
+	Bank internal bank;
 
 	// TODO do we want to store this in the contract?
 	// string memory _name,
 	// string memory _symbol
 	constructor(
-		ERC20 _asset,
+		ERC20 asset_,
 		Bank _bank,
 		uint256 _managementFee,
 		address _owner,
 		address _guardian,
 		address _manager
 	) Auth(_owner, _guardian, _manager) {
-		asset = _asset;
+		_asset = asset_;
 		bank = _bank;
 		bank.addPool(
 			Pool({
 				vault: address(this),
 				id: 0,
 				managementFee: _managementFee.toUint16(),
-				decimals: asset.decimals(),
+				decimals: _asset.decimals(),
 				exists: true
 			})
 		);
@@ -53,7 +53,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 
 	function deposit(uint256 assets, address receiver) public virtual returns (uint256 shares) {
 		// Need to transfer before minting or ERC777s could reenter.
-		asset.safeTransferFrom(msg.sender, address(this), assets);
+		_asset.safeTransferFrom(msg.sender, address(this), assets);
 
 		// TODO make sure totalAssets is adjusted for lockedProfit
 		uint256 total = totalAssets();
@@ -71,7 +71,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 		assets = previewMint(shares); // No need to check for rounding error, previewMint rounds up.
 
 		// Need to transfer before minting or ERC777s could reenter.
-		asset.safeTransferFrom(msg.sender, address(this), assets);
+		_asset.safeTransferFrom(msg.sender, address(this), assets);
 
 		bank.mint(0, receiver, shares);
 
@@ -98,7 +98,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 
 		emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-		asset.safeTransfer(receiver, assets);
+		_asset.safeTransfer(receiver, assets);
 	}
 
 	function redeem(
@@ -119,7 +119,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 		uint256 total = totalAssets() - lockedProfit();
 		shares = bank.withdraw(0, owner, shares, total);
 		emit Withdraw(msg.sender, receiver, owner, assets, shares);
-		asset.safeTransfer(receiver, assets);
+		_asset.safeTransfer(receiver, assets);
 	}
 
 	/*//////////////////////////////////////////////////////////////

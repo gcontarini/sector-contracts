@@ -3,13 +3,14 @@ pragma solidity >=0.8.0;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { ReentrancyGuardUpgradeable as ReentrancyGuardU } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { SafeERC20, IERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { FixedPointMathLib } from "../../libraries/FixedPointMathLib.sol";
 import { IERC4626 } from "../../interfaces/IERC4626.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { SafeERC20Upgradeable as SafeERC20 } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { IERC20Upgradeable as IERC20 } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { Bank, Pool } from "../../bank/Bank.sol";
 import { AuthU } from "../../common/AuthU.sol";
-// import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 	using SafeERC20 for ERC20;
@@ -50,9 +51,9 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 		return _symbol;
 	}
 
-	function bank() external view returns (address) {
-		return address(_bank);
-	}
+	// function bank() external view returns (address) {
+	// 	return address(_bank);
+	// }
 
 	function asset() external view returns (address) {
 		return address(_asset);
@@ -64,7 +65,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 
 	function deposit(uint256 assets, address receiver) public virtual returns (uint256 shares) {
 		// Need to transfer before minting or ERC777s could reenter.
-		_asset.safeTransferFrom(msg.sender, address(this), assets);
+		_asset.transferFrom(msg.sender, address(this), assets);
 
 		// TODO make sure totalAssets is adjusted for lockedProfit
 		uint256 total = totalAssets();
@@ -82,7 +83,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 		assets = previewMint(shares); // No need to check for rounding error, previewMint rounds up.
 
 		// Need to transfer before minting or ERC777s could reenter.
-		_asset.safeTransferFrom(msg.sender, address(this), assets);
+		_asset.transferFrom(msg.sender, address(this), assets);
 
 		_bank.mint(0, receiver, shares);
 
@@ -109,7 +110,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 
 		emit Withdraw(msg.sender, receiver, owner, assets, shares);
 
-		_asset.safeTransfer(receiver, assets);
+		_asset.transfer(receiver, assets);
 	}
 
 	function redeem(
@@ -130,7 +131,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 		uint256 total = totalAssets() - lockedProfit();
 		shares = _bank.withdraw(0, owner, shares, total);
 		emit Withdraw(msg.sender, receiver, owner, assets, shares);
-		_asset.safeTransfer(receiver, assets);
+		_asset.transfer(receiver, assets);
 	}
 
 	/*//////////////////////////////////////////////////////////////

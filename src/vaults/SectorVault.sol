@@ -12,13 +12,17 @@ contract SectorVault is ERC4626 {
 	event bridgeAsset(uint32 _fromChainId, uint32 _toChainId, uint256 amount);
 
 	constructor(
-		ERC20 _asset,
+		ERC20 asset_,
 		Bank _bank,
 		uint256 _managementFee,
 		address _owner,
 		address _guardian,
 		address _manager
-	) ERC4626(_asset, _bank, _managementFee, _owner, _guardian, _manager) {}
+	) ERC4626(asset_, _bank, _managementFee, _owner, _guardian, _manager) {}
+
+	function asset() external view returns (address assetTokenAddress) {
+		return address(this);
+	}
 
 	// we may not need locked profit depending on how we handle withdrawals
 	// normally it is used to gradually release recent harvest rewards in order to avoid
@@ -28,7 +32,7 @@ contract SectorVault is ERC4626 {
 	}
 
 	function totalAssets() public view override returns (uint256) {
-		return asset.balanceOf(address(this));
+		return _asset.balanceOf(address(this));
 	}
 
 	// Added function to emit event
@@ -41,7 +45,7 @@ contract SectorVault is ERC4626 {
 	}
 
 	function approveForManager(uint256 amount, address manager) public {
-		asset.approve(manager, amount);
+		_asset.approve(manager, amount);
 	}
 
 	// For ERC-20 tokens

@@ -4,6 +4,7 @@ pragma solidity 0.8.16;
 import { SafeERC20Upgradeable as SafeERC20, IERC20Upgradeable as IERC20 } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import { SocketIntegratorU } from "../common/SocketIntegratorU.sol";
 import { Bank } from "../bank/Bank.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC4626U } from "./ERC4626/ERC4626U.sol";
 import { HarvestSwapParms } from "../interfaces/Structs.sol";
 
@@ -48,20 +49,20 @@ contract SectorVault is ERC4626U, SocketIntegratorU {
 		uint256[] calldata amounts,
 		uint256[] calldata minSharesOut
 	) public onlyRole("MANAGER") {
-		if (vaults.lenght != amounts.lenght || amounts.lenght != minSharesOut.lenght)
+		if (vaults.length != amounts.length || amounts.length != minSharesOut.length)
 			revert InvalidArraySize();
 
 		// Should revert if minSharesOut is lower than actual minted.
 		// but where in vault this is needed or emitted?
 		// Should the bank handle this revert?
-		for (uint256 i = 0; i < vaults.lenght;) {
+		for (uint256 i = 0; i < vaults.length;) {
 
 			// TODO: find out who is responsible for this.
 			uint256 mintedShares = 0;
 			if (minSharesOut[i] < mintedShares)
 				revert SharesLowerExp(minSharesOut[i], mintedShares);
 
-			IERC4626(vaults[i]).deposit(amounts[i]);
+			ERC4626U(vaults[i]).deposit(amounts[i], address(this));
 
 			unchecked {	i++; }
 		}
@@ -82,4 +83,6 @@ contract SectorVault is ERC4626U, SocketIntegratorU {
 		HarvestSwapParms[] calldata harvestParams) public onlyRole("MANAGER") {
 	}
 
+	error SharesLowerExp(uint, uint);
+	error InvalidArraySize();
 }
