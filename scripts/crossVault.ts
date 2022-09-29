@@ -25,8 +25,10 @@ async function deployVault(
   guardian: string,
   manager: string): Promise<Contract> {
 
+  managementFee;
+
   const VAULT = await ethers.getContractFactory("SectorVault");
-  const vault = await VAULT.deploy(tokenAddress, bankAddress, managementFee, owner, guardian, manager);
+  const vault = await VAULT.deploy(tokenAddress, bankAddress, owner, guardian, manager);
   await vault.deployed();
 
   return vault;
@@ -77,7 +79,7 @@ async function main() {
   await grantToken(
     vaults[0].address,
     USDC,
-    25,
+    5000,
     whaleAddress
   );
 }

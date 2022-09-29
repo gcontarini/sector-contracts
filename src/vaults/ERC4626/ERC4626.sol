@@ -9,6 +9,7 @@ import { Bank, Pool } from "../../bank/Bank.sol";
 import { Auth } from "../../common/Auth.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+import "hardhat/console.sol";
 /// @notice Minimal ERC4626 tokenized Vault implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/mixins/ERC4626.sol)
 abstract contract ERC4626 is IERC4626, Auth {
@@ -29,29 +30,29 @@ abstract contract ERC4626 is IERC4626, Auth {
 	constructor(
 		ERC20 asset_,
 		Bank _bank,
-		uint256 _managementFee,
+		// uint256 _managementFee,
 		address _owner,
 		address _guardian,
 		address _manager
 	) Auth(_owner, _guardian, _manager) {
 		_asset = asset_;
 		bank = _bank;
-		bank.addPool(
-			Pool({
-				vault: address(this),
-				id: 0,
-				managementFee: _managementFee.toUint16(),
-				decimals: _asset.decimals(),
-				exists: true
-			})
-		);
+		// bank.addPool(
+		// 	Pool({
+		// 		vault: address(this),
+		// 		id: 0,
+		// 		managementFee: _managementFee.toUint16(),
+		// 		decimals: asset.decimals(),
+		// 		exists: true
+		// 	})
+		// );
 	}
 
 	/*//////////////////////////////////////////////////////////////
                         DEPOSIT/WITHDRAWAL LOGIC
     //////////////////////////////////////////////////////////////*/
 
-	function deposit(uint256 assets, address receiver) public virtual returns (uint256 shares) {
+	function deposit(uint256 assets, address receiver) public returns (uint256 shares) {
 		// Need to transfer before minting or ERC777s could reenter.
 		_asset.safeTransferFrom(msg.sender, address(this), assets);
 
@@ -67,7 +68,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 		afterDeposit(assets, shares);
 	}
 
-	function mint(uint256 shares, address receiver) public virtual returns (uint256 assets) {
+	function mint(uint256 shares, address receiver) public returns (uint256 assets) {
 		assets = previewMint(shares); // No need to check for rounding error, previewMint rounds up.
 
 		// Need to transfer before minting or ERC777s could reenter.
@@ -84,7 +85,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 		uint256 assets,
 		address receiver,
 		address owner
-	) public virtual returns (uint256 shares) {
+	) public returns (uint256 shares) {
 		shares = previewWithdraw(assets); // No need to check for rounding error, previewWithdraw rounds up.
 
 		if (msg.sender != owner) {
@@ -105,7 +106,7 @@ abstract contract ERC4626 is IERC4626, Auth {
 		uint256 shares,
 		address receiver,
 		address owner
-	) public virtual returns (uint256 assets) {
+	) public returns (uint256 assets) {
 		if (msg.sender != owner) {
 			// TODO granula approvals?
 			if (!bank.isApprovedForAll(owner, msg.sender)) revert MissingApproval();
@@ -126,38 +127,44 @@ abstract contract ERC4626 is IERC4626, Auth {
                             ACCOUNTING LOGIC
     //////////////////////////////////////////////////////////////*/
 
-	function totalAssets() public view virtual returns (uint256);
+	function assetz() external view returns (address) {
+		return address(_asset);
+	}
 
-	function lockedProfit() public view virtual returns (uint256) {
+	function totalAssets() public view returns (uint256) {
+		return _asset.balanceOf(address(this));
+	}
+
+	function lockedProfit() public pure returns (uint256) {
 		return 0;
 	}
 
-	function convertToShares(uint256 assets) public view virtual returns (uint256) {
+	function convertToShares(uint256 assets) public view returns (uint256) {
 		return bank.assetToShares(0, assets, totalAssets());
 	}
 
-	function convertToAssets(uint256 shares) public view virtual returns (uint256) {
+	function convertToAssets(uint256 shares) public view returns (uint256) {
 		uint256 supply = bank.totalShares(address(this), 0);
 		return supply == 0 ? shares : shares.mulDivDown(totalAssets(), supply);
 	}
 
-	function previewDeposit(uint256 assets) public view virtual returns (uint256) {
+	function previewDeposit(uint256 assets) public view returns (uint256) {
 		return bank.assetToShares(0, assets, totalAssets());
 	}
 
-	function previewMint(uint256 shares) public view virtual returns (uint256) {
+	function previewMint(uint256 shares) public view returns (uint256) {
 		uint256 supply = bank.totalShares(address(this), 0);
 		return supply == 0 ? shares : shares.mulDivUp(totalAssets(), supply);
 	}
 
-	function previewWithdraw(uint256 assets) public view virtual returns (uint256) {
+	function previewWithdraw(uint256 assets) public view returns (uint256) {
 		uint256 supply = bank.totalShares(address(this), 0);
 		// remove locked profit on redeem
 		uint256 total = totalAssets() - lockedProfit();
 		return supply == 0 ? assets : assets.mulDivUp(supply, total);
 	}
 
-	function previewRedeem(uint256 shares) public view virtual returns (uint256) {
+	function previewRedeem(uint256 shares) public view returns (uint256) {
 		return bank.assetToShares(0, shares, totalAssets());
 	}
 
@@ -165,21 +172,21 @@ abstract contract ERC4626 is IERC4626, Auth {
                      DEPOSIT/WITHDRAWAL LIMIT LOGIC
     //////////////////////////////////////////////////////////////*/
 
-	function maxDeposit(address) public view virtual returns (uint256) {
+	function maxDeposit(address) public pure returns (uint256) {
 		return type(uint256).max;
 	}
 
-	function maxMint(address) public view virtual returns (uint256) {
+	function maxMint(address) public pure returns (uint256) {
 		return type(uint256).max;
 	}
 
-	function maxWithdraw(address owner) public view virtual returns (uint256) {
+	function maxWithdraw(address owner) public view returns (uint256) {
 		// TODO add a lib to avoid external calls
 		uint256 tokenId = bank.getTokenId(address(this), 0);
 		return convertToAssets(bank.balanceOf(owner, tokenId));
 	}
 
-	function maxRedeem(address owner) public view virtual returns (uint256) {
+	function maxRedeem(address owner) public view returns (uint256) {
 		// TODO add a lib to avoid external calls
 		uint256 tokenId = bank.getTokenId(address(this), 0);
 		return bank.balanceOf(owner, tokenId);
@@ -189,9 +196,13 @@ abstract contract ERC4626 is IERC4626, Auth {
                           INTERNAL HOOKS LOGIC
     //////////////////////////////////////////////////////////////*/
 
-	function beforeWithdraw(uint256 assets, uint256 shares) internal virtual {}
+	function beforeWithdraw(uint256 assets, uint256 shares) internal view {
+		console.log(assets, shares);
+	}
 
-	function afterDeposit(uint256 assets, uint256 shares) internal virtual {}
+	function afterDeposit(uint256 assets, uint256 shares) internal view {
+		console.log(shares, assets);
+	}
 
 	error MissingApproval();
 }

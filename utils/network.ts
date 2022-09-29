@@ -19,7 +19,7 @@ export const setupAccount = async (address: string): Promise<Signer> => {
     params: [address],
   });
 
-  await fundAccount(address, '10000');
+  await fundAccount(address, '1000000');
   return await ethers.getSigner(address);
 };
 
