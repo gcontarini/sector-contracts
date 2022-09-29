@@ -66,11 +66,10 @@ async function main() {
         // Get transaction data
         const apiReturnData = await getRouteTransactionData(route);
 
-
         // const VAULT = await ethers.getContractFactory("SectorVault");
         // const vault = VAULT.attach(vaultAddress);
 
-        // await vault.approveForManager(amount, owner);
+        await vault.approveForManager(amount, owner);
 
         // Call bridgeAssets on vault's contract
         const tx = await vault.sendTokens(
