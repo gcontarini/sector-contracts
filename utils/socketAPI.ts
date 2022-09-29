@@ -10,8 +10,9 @@ export async function getQuote(
     userAddress: string,
     uniqueRoutesPerBridge: boolean,
     sort: string,
-    singleTxOnly: boolean): Promise <any> {
-    const response = await fetch(`https://api.socket.tech/v2/quote?fromChainId=${fromChainId}&fromTokenAddress=${fromTokenAddress}&toChainId=${toChainId}&toTokenAddress=${toTokenAddress}&fromAmount=${fromAmount}&userAddress=${userAddress}&uniqueRoutesPerBridge=${uniqueRoutesPerBridge}&sort=${sort}&singleTxOnly=${singleTxOnly}`, {
+    singleTxOnly: boolean,
+    isContractCall: boolean): Promise <any> {
+    const response = await fetch(`https://api.socket.tech/v2/quote?fromChainId=${fromChainId}&fromTokenAddress=${fromTokenAddress}&toChainId=${toChainId}&toTokenAddress=${toTokenAddress}&fromAmount=${fromAmount}&userAddress=${userAddress}&uniqueRoutesPerBridge=${uniqueRoutesPerBridge}&sort=${sort}&singleTxOnly=${singleTxOnly}&isContractCall=${isContractCall}`, {
         method: 'GET',
         headers: {
             'API-KEY': API_KEY,

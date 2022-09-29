@@ -77,7 +77,7 @@ async function main() {
   await grantToken(
     vaults[0].address,
     USDC,
-    25,
+    10000,
     whaleAddress
   );
 }

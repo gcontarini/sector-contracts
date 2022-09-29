@@ -10,7 +10,7 @@ import { HarvestSwapParms } from "../interfaces/Structs.sol";
 
 // import "hardhat/console.sol";
 
-contract SectorVault is ERC4626U, SocketIntegratorU {
+contract SectorVaultU is ERC4626U, SocketIntegratorU {
 	using SafeERC20 for ERC20;
 
 	// @custom:oz-upgrades-unsafe-allow constructor

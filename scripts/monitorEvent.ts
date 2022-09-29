@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { getQuote, getRouteTransactionData } from '../utils';
+import { getQuote, getRouteTransactionData, fundAccount } from '../utils';
 import vaultAddr from "../vaultAddress.json";
 
 async function main() {
@@ -49,6 +49,7 @@ async function main() {
         const uniqueRoutesPerBridge = true; // Set to true the best route for each bridge will be returned
         const sort = "output"; // "output" | "gas" | "time"
         const singleTxOnly = true; // Set to true to look for a single transaction route
+        const isContractCall = true; // Don't know if still necessary
 
         // Get quote
         const quote = await getQuote(
@@ -57,7 +58,8 @@ async function main() {
             toChainId, toAssetAddress,
             amount, userAddress,
             uniqueRoutesPerBridge,
-            sort, singleTxOnly
+            sort, singleTxOnly,
+            isContractCall
         );
 
         // Choosing first route from the returned route results
@@ -65,12 +67,6 @@ async function main() {
 
         // Get transaction data
         const apiReturnData = await getRouteTransactionData(route);
-
-
-        // const VAULT = await ethers.getContractFactory("SectorVault");
-        // const vault = VAULT.attach(vaultAddress);
-
-        // await vault.approveForManager(amount, owner);
 
         // Call bridgeAssets on vault's contract
         const tx = await vault.sendTokens(
@@ -80,7 +76,7 @@ async function main() {
             apiReturnData.result.approvalData.allowanceTarget,
             apiReturnData.result.approvalData.minimumApprovalAmount
         );
-        // console.log("TX", tx);
+        console.log("TX", tx);
     })
 }
 

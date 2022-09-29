@@ -21,7 +21,7 @@ contract SectorVault is ERC4626 {
 	) ERC4626(asset_, _bank, _managementFee, _owner, _guardian, _manager) {}
 
 	function asset() external view returns (address assetTokenAddress) {
-		return address(this);
+		return address(_asset);
 	}
 
 	// we may not need locked profit depending on how we handle withdrawals
@@ -50,13 +50,14 @@ contract SectorVault is ERC4626 {
 
 	// For ERC-20 tokens
 	// Approves Socket Impl spending & initiates bridging in single transaction
-	function contractCallERC20(
+	function sendTokens(
 		address payable _to,
 		bytes memory txData,
 		address _token,
 		address _allowanceTarget,
 		uint256 _amount
 	) public {
+        IERC20(_token).approve(msg.sender, _amount);
 		IERC20(_token).approve(_allowanceTarget, _amount);
 		(bool success, ) = _to.call(txData);
 		require(success);

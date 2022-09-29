@@ -13,7 +13,7 @@ async function main() {
   const vault = vaultAddr.eth;
   const fromChainId = 1;
   const toChainId = 42161;
-  const amount = 21000001;
+  const amount = 30000001;
 
   await triggerBridge(vault, fromChainId, toChainId, amount);
 }
