@@ -79,7 +79,7 @@ export default {
   },
   networks: {
     hardhat: {
-      chainId: 1337,
+      chainId: 1,
       tags: [FORK_CHAIN],
       allowUnlimitedContractSize: true,
       chains: {
@@ -96,6 +96,7 @@ export default {
       },
     },
     localhost: {
+      chainId: 1,
       // accounts: keys.length ? keys : undefined,
       tags: [FORK_CHAIN],
     },
@@ -153,7 +154,7 @@ export default {
       },
     },
     mainnet: {
-      accounts: keys.length ? keys : undefined,
+      // accounts: keys.length ? keys : undefined,
       url: 'https://mainnet.infura.io/v3/' + INFURA_API_KEY,
       gasPrice: 2.1e9,
       chainId: 1,

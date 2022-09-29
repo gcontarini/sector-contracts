@@ -55,7 +55,7 @@ abstract contract ERC4626U is Initializable, IERC4626, AuthU, ReentrancyGuardU {
 	// 	return address(_bank);
 	// }
 
-	function asset() external view returns (address) {
+	function assetz() external view returns (address) {
 		return address(_asset);
 	}
 

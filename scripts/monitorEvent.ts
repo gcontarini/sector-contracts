@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { getQuote, getRouteTransactionData, fundAccount } from '../utils';
 import vaultAddr from "../vaultAddress.json";
+import hre from 'hardhat'
 
 async function main() {
     const vaultAddress = vaultAddr.eth;
@@ -26,6 +27,11 @@ async function main() {
     const VAULT = await ethers.getContractFactory("SectorVault");
     const vault = VAULT.attach(vaultAddress);
 
+    const chainIs = hre.network.config.chainId
+    const chainName = hre.network.name
+    console.log("\n\ntesting chain id", chainIs, chainName);
+
+
     vault.on('bridgeAsset', async (_fromChainId, _toChainId, amount) => {
 
         console.log(`WE GOT AN EVENT on chain ${_fromChainId} to chain ${_toChainId} with value of ${amount}`)
@@ -41,6 +47,8 @@ async function main() {
         if (!fromChain || !toChain) {
             throw new Error('Chain not found');
         }
+
+        console.log("testing amount", amount);
 
         // Set Socket quote request params
         const fromAssetAddress = fromChain.address;
@@ -63,7 +71,11 @@ async function main() {
         );
 
         // Choosing first route from the returned route results
+        console.log("\n\n logging all routes", quote.result.routes);
+
         const route = quote.result.routes[0];
+
+        console.log("testing route: ", route);
 
         // Get transaction data
         const apiReturnData = await getRouteTransactionData(route);
@@ -74,7 +86,7 @@ async function main() {
             apiReturnData.result.txData,
             apiReturnData.result.approvalData.approvalTokenAddress,
             apiReturnData.result.approvalData.allowanceTarget,
-            apiReturnData.result.approvalData.minimumApprovalAmount
+            apiReturnData.result.approvalData.minimumApprovalAmount,
         );
         console.log("TX", tx);
     })

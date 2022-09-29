@@ -7,6 +7,7 @@ import { Bank } from "../bank/Bank.sol";
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import { ERC4626U } from "./ERC4626/ERC4626U.sol";
 import { HarvestSwapParms } from "../interfaces/Structs.sol";
+import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // import "hardhat/console.sol";
 
@@ -44,29 +45,29 @@ contract SectorVaultU is ERC4626U, SocketIntegratorU {
 
 	/// TODO do we need to provide bridge slippage / fee info?
 	/// must be able to handle the non-bridged vault (vault on same chain)
-	function depositIntoVaults(
-		address[] calldata vaults,
-		uint256[] calldata amounts,
-		uint256[] calldata minSharesOut
-	) public onlyRole("MANAGER") {
-		if (vaults.length != amounts.length || amounts.length != minSharesOut.length)
-			revert InvalidArraySize();
+	// function depositIntoVaults(
+	// 	address[] calldata vaults,
+	// 	uint256[] calldata amounts,
+	// 	uint256[] calldata minSharesOut
+	// ) public onlyRole("MANAGER") {
+	// 	if (vaults.lenght != amounts.lenght || amounts.lenght != minSharesOut.lenght)
+	// 		revert InvalidArraySize();
 
-		// Should revert if minSharesOut is lower than actual minted.
-		// but where in vault this is needed or emitted?
-		// Should the bank handle this revert?
-		for (uint256 i = 0; i < vaults.length;) {
+	// 	// Should revert if minSharesOut is lower than actual minted.
+	// 	// but where in vault this is needed or emitted?
+	// 	// Should the bank handle this revert?
+	// 	for (uint256 i = 0; i < vaults.lenght;) {
 
-			// TODO: find out who is responsible for this.
-			uint256 mintedShares = 0;
-			if (minSharesOut[i] < mintedShares)
-				revert SharesLowerExp(minSharesOut[i], mintedShares);
+	// 		// TODO: find out who is responsible for this.
+	// 		uint256 mintedShares = 0;
+	// 		if (minSharesOut[i] < mintedShares)
+	// 			revert SharesLowerExp(minSharesOut[i], mintedShares);
 
-			ERC4626U(vaults[i]).deposit(amounts[i], address(this));
+	// 		IERC4626(vaults[i]).deposit(amounts[i]);
 
-			unchecked {	i++; }
-		}
-	}
+	// 		unchecked {	i++; }
+	// 	}
+	// }
 
 	/// TODO we'll want some guarantee that base-level harvest happened recently
 	/// likely won't be able to actually do this cross-chain and will need to initiate

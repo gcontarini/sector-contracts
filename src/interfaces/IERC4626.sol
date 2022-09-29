@@ -21,7 +21,7 @@ interface IERC4626 {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-	function asset() external view returns (address assetTokenAddress);
+	function assetz() external view returns (address assetTokenAddress);
 
 	/*//////////////////////////////////////////////////////////////
                         DEPOSIT/WITHDRAWAL LOGIC
